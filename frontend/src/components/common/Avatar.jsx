@@ -1,9 +1,17 @@
-import { initials, avatarGrad } from '../../utils/helpers';
+import {
+  initials,
+  avatarGrad,
+} from '../../utils/helpers';
+
 
 export default function Avatar({
+
   user,
+
   size = 10,
+
   ring = true,
+
   className = '',
 }) {
 
@@ -17,12 +25,14 @@ export default function Avatar({
   )}px`;
 
   const grad = avatarGrad(
-    user?.username || user?.name || ''
+    user?.username ||
+    user?.name ||
+    ''
   );
 
 
   // ─────────────────────────────────────────────
-  // User Avatar Image
+  // Avatar Image
   // ─────────────────────────────────────────────
 
   if (user?.avatar) {
@@ -30,13 +40,7 @@ export default function Avatar({
     return (
 
       <img
-        src={
-          user.avatar.startsWith('http')
-
-            ? user.avatar
-
-            : `https://socialconnect-backend-czfw.onrender.com${user.avatar}`
-        }
+        src={user.avatar}
 
         alt={user?.name || 'User'}
 
@@ -90,7 +94,8 @@ export default function Avatar({
     >
 
       {initials(
-        user?.name || user?.username
+        user?.name ||
+        user?.username
       )}
     </div>
   );

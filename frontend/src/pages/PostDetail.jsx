@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+
 import {
   useParams,
   useNavigate,
@@ -10,6 +11,7 @@ import { useSelector } from 'react-redux';
 import api from '../utils/api';
 
 import Avatar from '../components/common/Avatar';
+
 import CommentSection from '../components/comments/CommentSection';
 
 import {
@@ -34,6 +36,7 @@ import {
 
 import toast from 'react-hot-toast';
 
+
 export default function PostDetail() {
 
   const { id } = useParams();
@@ -44,7 +47,13 @@ export default function PostDetail() {
     (state) => state.auth
   );
 
-  const [post, setPost] = useState(null);
+
+  // ─────────────────────────────────────────────
+  // States
+  // ─────────────────────────────────────────────
+
+  const [post, setPost] =
+    useState(null);
 
   const [loading, setLoading] =
     useState(true);
@@ -76,8 +85,11 @@ export default function PostDetail() {
   // ─────────────────────────────────────────────
 
   useEffect(() => {
+
     fetchPost();
+
   }, [id]);
+
 
   const fetchPost = async () => {
 
@@ -93,10 +105,14 @@ export default function PostDetail() {
       setPost(p);
 
       setLiked(
-        p.likes?.map(String).includes(me?._id)
+        p.likes
+          ?.map(String)
+          .includes(me?._id)
       );
 
-      setLikes(p.likes?.length || 0);
+      setLikes(
+        p.likes?.length || 0
+      );
 
       setSaved(
         me?.savedPosts
@@ -104,18 +120,25 @@ export default function PostDetail() {
           .includes(p._id)
       );
 
-      setCaption(p.caption || '');
+      setCaption(
+        p.caption || ''
+      );
 
-      setTags((p.tags || []).join(', '));
+      setTags(
+        (p.tags || []).join(', ')
+      );
 
-    } catch (error) {
+    } catch {
 
-      toast.error('Post not found');
+      toast.error(
+        'Post not found'
+      );
 
       navigate('/');
     }
 
     finally {
+
       setLoading(false);
     }
   };
@@ -138,11 +161,17 @@ export default function PostDetail() {
     try {
 
       const response =
-        await api.post(`/posts/like/${id}`);
+        await api.post(
+          `/posts/like/${id}`
+        );
 
-      setLiked(response.data.isLiked);
+      setLiked(
+        response.data.isLiked
+      );
 
-      setLikes(response.data.likesCount);
+      setLikes(
+        response.data.likesCount
+      );
 
     } catch {
 
@@ -167,7 +196,9 @@ export default function PostDetail() {
 
     try {
 
-      await api.post(`/users/save/${id}`);
+      await api.post(
+        `/users/save/${id}`
+      );
 
       toast.success(
         previous
@@ -179,7 +210,9 @@ export default function PostDetail() {
 
       setSaved(previous);
 
-      toast.error('Failed to save');
+      toast.error(
+        'Failed to save'
+      );
     }
   };
 
@@ -192,23 +225,29 @@ export default function PostDetail() {
 
     try {
 
-      await api.post(`/posts/share/${id}`);
+      await api.post(
+        `/posts/share/${id}`
+      );
 
       await navigator.clipboard.writeText(
         window.location.href
       );
 
-      toast.success('Link copied');
+      toast.success(
+        'Link copied'
+      );
 
     } catch {
 
-      toast.error('Failed to share');
+      toast.error(
+        'Failed to share'
+      );
     }
   };
 
 
   // ─────────────────────────────────────────────
-  // Save Edited Post
+  // Save Edit
   // ─────────────────────────────────────────────
 
   const saveEdit = async () => {
@@ -218,23 +257,31 @@ export default function PostDetail() {
     try {
 
       const response =
-        await api.put(`/posts/${id}`, {
-          caption,
-          tags,
-        });
+        await api.put(
+          `/posts/${id}`,
+          {
+            caption,
+            tags,
+          }
+        );
 
       setPost(response.data.post);
 
       setEditing(false);
 
-      toast.success('Post updated');
+      toast.success(
+        'Post updated'
+      );
 
     } catch {
 
-      toast.error('Failed to update');
+      toast.error(
+        'Failed to update'
+      );
     }
 
     finally {
+
       setSaving(false);
     }
   };
@@ -255,15 +302,21 @@ export default function PostDetail() {
 
     try {
 
-      await api.delete(`/posts/${id}`);
+      await api.delete(
+        `/posts/${id}`
+      );
 
-      toast.success('Post deleted');
+      toast.success(
+        'Post deleted'
+      );
 
       navigate('/');
 
     } catch {
 
-      toast.error('Failed to delete');
+      toast.error(
+        'Failed to delete'
+      );
     }
   };
 
@@ -273,18 +326,22 @@ export default function PostDetail() {
   // ─────────────────────────────────────────────
 
   if (loading) {
+
     return <PageLoader />;
   }
 
   if (!post) {
+
     return null;
   }
+
 
   const isOwner =
     post.user?._id === me?._id;
 
 
   return (
+
     <div className="space-y-4 animate-fade-up">
 
       {/* Back Button */}
@@ -292,7 +349,9 @@ export default function PostDetail() {
         onClick={() => navigate(-1)}
         className="btn-ghost pl-0 text-[--text-3]"
       >
+
         <ArrowLeft className="w-4 h-4" />
+
         Back
       </button>
 
@@ -316,28 +375,34 @@ export default function PostDetail() {
             <div>
 
               <p className="font-semibold text-[--text-1] group-hover:text-ink-400 transition-colors">
+
                 {post.user?.name}
               </p>
 
               <p className="text-xs text-[--text-3]">
-                @{post.user?.username} •{' '}
-                {timeAgo(post.createdAt)}
-              </p>
 
+                @{post.user?.username}
+                {' • '}
+                {timeAgo(post.createdAt)}
+
+              </p>
             </div>
           </Link>
 
 
           {/* Owner Actions */}
           {isOwner && (
+
             <div className="flex gap-2">
 
               <button
                 onClick={() =>
                   setEditing(!editing)
                 }
+
                 className="btn-ghost py-1.5 px-3 text-xs"
               >
+
                 <Edit3 className="w-3.5 h-3.5" />
 
                 {editing
@@ -345,11 +410,15 @@ export default function PostDetail() {
                   : 'Edit'}
               </button>
 
+
               <button
                 onClick={deletePost}
+
                 className="btn-ghost py-1.5 px-3 text-xs text-red-500 hover:bg-red-500/10"
               >
+
                 <Trash2 className="w-3.5 h-3.5" />
+
                 Delete
               </button>
             </div>
@@ -357,54 +426,76 @@ export default function PostDetail() {
         </div>
 
 
-        {/* Edit Form */}
+        {/* Edit Mode */}
         {editing ? (
 
           <div className="space-y-3 mb-4">
 
             <textarea
               value={caption}
+
               onChange={(e) =>
-                setCaption(e.target.value)
+                setCaption(
+                  e.target.value
+                )
               }
+
               rows={4}
+
               maxLength={2200}
+
               placeholder="Write caption..."
+
               className="field resize-none"
             />
 
+
             <input
               value={tags}
+
               onChange={(e) =>
-                setTags(e.target.value)
+                setTags(
+                  e.target.value
+                )
               }
+
               placeholder="Tags: react, social"
+
               className="field"
             />
+
 
             <div className="flex gap-2">
 
               <button
                 onClick={saveEdit}
+
                 disabled={saving}
+
                 className="btn-primary py-2 px-4"
               >
 
                 {saving ? (
+
                   <Loader2 className="w-4 h-4 animate-spin" />
+
                 ) : (
+
                   <Edit3 className="w-4 h-4" />
                 )}
 
                 Save Changes
               </button>
 
+
               <button
                 onClick={() =>
                   setEditing(false)
                 }
+
                 className="btn-outline py-2 px-4"
               >
+
                 Cancel
               </button>
             </div>
@@ -415,10 +506,13 @@ export default function PostDetail() {
           <>
             {/* Caption */}
             {post.caption && (
+
               <p className="text-[--text-1] leading-relaxed whitespace-pre-line mb-4">
+
                 {post.caption}
               </p>
             )}
+
 
             {/* Tags */}
             {post.tags?.length > 0 && (
@@ -429,9 +523,12 @@ export default function PostDetail() {
 
                   <Link
                     key={tag}
+
                     to={`/search?q=%23${tag}`}
+
                     className="tag"
                   >
+
                     #{tag}
                   </Link>
                 ))}
@@ -445,11 +542,7 @@ export default function PostDetail() {
         {post.image && (
 
           <img
-            src={
-              post.image.startsWith('http')
-                ? post.image
-                : `https://socialconnect-backend-czfw.onrender.com${post.image}`
-            }
+            src={post.image}
 
             alt="Post"
 
@@ -477,6 +570,7 @@ export default function PostDetail() {
           {/* Like */}
           <button
             onClick={toggleLike}
+
             className={`post-btn ${
               liked
                 ? '!text-red-500'
@@ -499,12 +593,14 @@ export default function PostDetail() {
           {/* Share */}
           <button
             onClick={sharePost}
+
             className="post-btn"
           >
 
             <Share2 className="w-5 h-5" />
 
             {fmtCount(post.shares || 0)}
+            {' '}
             Shares
           </button>
 
@@ -512,6 +608,7 @@ export default function PostDetail() {
           {/* Save */}
           <button
             onClick={toggleSave}
+
             className={`post-btn ml-auto ${
               saved
                 ? '!text-ink-400'
@@ -520,12 +617,17 @@ export default function PostDetail() {
           >
 
             {saved ? (
+
               <BookmarkCheck className="w-5 h-5 fill-current" />
+
             ) : (
+
               <Bookmark className="w-5 h-5" />
             )}
 
-            {saved ? 'Saved' : 'Save'}
+            {saved
+              ? 'Saved'
+              : 'Save'}
           </button>
         </div>
       </div>
@@ -544,6 +646,7 @@ export default function PostDetail() {
 
         <CommentSection
           postId={post._id}
+
           initialComments={
             post.comments || []
           }
