@@ -1,25 +1,60 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5001/api',
-  timeout: 20000
+  baseURL: import.meta.env.VITE_API_URL,
+  timeout: 20000,
+
+  headers: {
+    'Content-Type': 'application/json',
+  },
+
+  withCredentials: true,
 });
 
-api.interceptors.request.use(cfg => {
-  const token = localStorage.getItem('sc_token');
-  if (token) cfg.headers.Authorization = `Bearer ${token}`;
-  return cfg;
-});
+
+// ─────────────────────────────────────────────
+// Request Interceptor
+// ─────────────────────────────────────────────
+
+api.interceptors.request.use(
+  (config) => {
+
+    const token = localStorage.getItem('sc_token');
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+
+// ─────────────────────────────────────────────
+// Response Interceptor
+// ─────────────────────────────────────────────
 
 api.interceptors.response.use(
-  r => r,
-  err => {
-    if (err.response?.status === 401) {
+
+  (response) => response,
+
+  (error) => {
+
+    // Unauthorized
+    if (error.response?.status === 401) {
+
       localStorage.removeItem('sc_token');
+
       localStorage.removeItem('sc_user');
+
       window.location.href = '/login';
     }
-    return Promise.reject(err);
+
+    return Promise.reject(error);
   }
 );
 
