@@ -1,4 +1,5 @@
 require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -6,42 +7,136 @@ const path = require('path');
 
 const app = express();
 
-// ── Middleware ──────────────────────────────────────────────────
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true,
-}));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Serve uploaded files statically
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// ─────────────────────────────────────────────────────────────
+// CORS Configuration
+// ─────────────────────────────────────────────────────────────
 
-// ── Routes ──────────────────────────────────────────────────────
-app.use('/api/auth',   require('./routes/auth'));
-app.use('/api/users',  require('./routes/users'));
-app.use('/api/posts',  require('./routes/posts'));
-app.use('/api/search', require('./routes/search'));
-app.use('/api/admin',  require('./routes/admin'));
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://social-connect-woad.vercel.app',
+];
 
-// Health check
-app.get('/api/health', (_req, res) =>
-  res.json({ status: 'ok', time: new Date() })
+app.use(
+  cors({
+    origin: function (origin, callback) {
+
+      // Allow requests with no origin
+      // (mobile apps, postman, curl, etc.)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('CORS not allowed'));
+      }
+    },
+
+    credentials: true,
+  })
 );
 
-// ── Global error handler ────────────────────────────────────────
-app.use((err, _req, res, _next) => {
-  console.error('[ERROR]', err.message);
-  res.status(err.status || 500).json({ success: false, message: err.message || 'Server error' });
+
+// ─────────────────────────────────────────────────────────────
+// Middleware
+// ─────────────────────────────────────────────────────────────
+
+app.use(express.json({ limit: '10mb' }));
+
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: '10mb',
+  })
+);
+
+
+// ─────────────────────────────────────────────────────────────
+// Static Uploads
+// ─────────────────────────────────────────────────────────────
+
+app.use(
+  '/uploads',
+  express.static(path.join(__dirname, 'uploads'))
+);
+
+
+// ─────────────────────────────────────────────────────────────
+// Routes
+// ─────────────────────────────────────────────────────────────
+
+app.use('/api/auth', require('./routes/auth'));
+
+app.use('/api/users', require('./routes/users'));
+
+app.use('/api/posts', require('./routes/posts'));
+
+app.use('/api/search', require('./routes/search'));
+
+app.use('/api/admin', require('./routes/admin'));
+
+
+// ─────────────────────────────────────────────────────────────
+// Health Check Route
+// ─────────────────────────────────────────────────────────────
+
+app.get('/api/health', (_req, res) => {
+  res.status(200).json({
+    success: true,
+    status: 'Server is running 🚀',
+    time: new Date(),
+  });
 });
 
-// ── Start ───────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────
+// Root Route
+// ─────────────────────────────────────────────────────────────
+
+app.get('/', (_req, res) => {
+  res.send('SocioConnect Backend API Running 🚀');
+});
+
+
+// ─────────────────────────────────────────────────────────────
+// Global Error Handler
+// ─────────────────────────────────────────────────────────────
+
+app.use((err, _req, res, _next) => {
+
+  console.error('❌ ERROR:', err.message);
+
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal Server Error',
+  });
+});
+
+
+// ─────────────────────────────────────────────────────────────
+// Database Connection & Server Start
+// ─────────────────────────────────────────────────────────────
+
 const PORT = process.env.PORT || 5000;
 
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
-    console.log('✅  MongoDB connected');
-    app.listen(PORT, () => console.log(`🚀  Server → http://localhost:${PORT}`));
+
+    console.log('✅ MongoDB Connected');
+
+    app.listen(PORT, () => {
+      console.log(
+        `🚀 Server running on port ${PORT}`
+      );
+    });
   })
-  .catch((err) => { console.error('❌  MongoDB error:', err.message); process.exit(1); });
+  .catch((err) => {
+
+    console.error(
+      '❌ MongoDB Connection Error:',
+      err.message
+    );
+
+    process.exit(1);
+  });
