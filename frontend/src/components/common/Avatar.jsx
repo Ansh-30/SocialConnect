@@ -9,7 +9,7 @@ export default function Avatar({ user, size = 10, ring = true, className = '' })
   if (user?.avatar) {
     return (
       <img
-        src={`http://localhost:5001${user.avatar}`}
+        src={`https://socialconnect-backend-czfw.onrender.com${post.image}`}
         alt={user?.name || "User"}
         style={{ width: sz, height: sz, minWidth: sz, fontSize: fs }}
         className={`rounded-full object-cover ${

@@ -118,7 +118,7 @@ export default function PostCard({ post, onRemove }) {
 {post.image && (
   <Link to={`/post/${post._id}`} className="block mb-3">
     <img
-      src={`http://localhost:5001${post.image}`}
+      src={`https://socialconnect-backend-czfw.onrender.com${post.image}`}
       alt="Post"
       className="w-full rounded-xl object-cover max-h-[500px] hover:opacity-97 transition-opacity"
       loading="lazy"
