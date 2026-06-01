@@ -262,7 +262,7 @@ Deploy on:
 
 # 👨‍💻 Author
 
-### Ansh Sharma
+## Ansh Sharma
 
 Passionate Full Stack Developer & Tech Enthusiast.
 
